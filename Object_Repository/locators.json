@@ -1,0 +1,72 @@
+{
+
+    "Reject_Cookies": [
+
+    { "by": "CSS_SELECTOR", "value": "#onetrust-reject-all-handler" },
+    { "by": "XPATH",        "value": "//button[@id='onetrust-reject-all-handler']" }
+  ],
+
+  "login_Menu_Link": [
+
+    { "by": "CSS_SELECTOR", "value": ".layout-header-action-account__link.link" },
+    { "by": "XPATH",        "value": "//a[@class='layout-header-action-account__link link']" }
+  ],
+
+
+  "email_field": [
+    { "by": "ID",           "value": "zds-:r4:" },
+    { "by": "XPATH",        "value": "//input[@id='zds-:r4:']" }
+  ],
+
+    "Passcode_field": [
+    { "by": "ID",           "value": "zds-:r7:" },
+    { "by": "XPATH",        "value": "//input[@id='zds-:r7:']" }
+  ],
+
+    "Log_in_Button": [
+
+    { "by": "CSS_SELECTOR", "value": ".zds-button.enhanced-oauth-logon-view__button.zds-button--primary.zds-button--small" },
+    { "by": "XPATH",        "value": "//button[normalize-space()='LOG IN']" }
+  ],
+
+    "Login_Button": [
+
+    { "by": "CSS_SELECTOR", "value": "button[role='button']" },
+    { "by": "XPATH",        "value": "//button[@role='button']" }
+  ]
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
