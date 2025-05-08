@@ -33,9 +33,14 @@
 
     { "by": "CSS_SELECTOR", "value": "button[role='button']" },
     { "by": "XPATH",        "value": "//button[@role='button']" }
+  ],
+
+  "login_error_message": [
+    {
+      "by": "XPATH",
+      "value": "//div[contains(@class,'error-feedback')]//p[contains(normalize-space(.),'do not correspond to any account')]"
+    }
   ]
-
-
 
 
 }

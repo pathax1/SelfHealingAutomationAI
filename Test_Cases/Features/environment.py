@@ -2,7 +2,13 @@
 
 import os
 import pandas as pd
-from Common_Functions.CommonFunctions import LaunchBrowser
+from Common_Functions.CommonFunctions import (
+    LaunchBrowser,
+    start_word_report,
+    add_screenshot_to_report,
+    finalize_word_report
+)
+
 
 def before_scenario(context, scenario):
     # Pull URL and TestCase_ID from behave -D args
@@ -21,10 +27,7 @@ def before_scenario(context, scenario):
     if row.empty:
         raise KeyError(f"No test data for {tc_id}")
     context.testdata = row.iloc[0].to_dict()
-
+    context.report_doc, context.report_path = start_word_report(tc_id)
 def after_scenario(context, scenario):
-    # Quit that one browser
-    try:
-        context.driver.quit()
-    except Exception:
-        pass
+    finalize_word_report(context.report_doc, context.report_path)
+    context.driver.quit()

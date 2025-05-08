@@ -6,6 +6,9 @@
 # Author: Adapted with AI-driven enhancements
 # Date Updated: 2025-05-07
 # ***************************************************************************************************************************************************************************************
+from docx import Document
+from docx.shared import Inches
+from selenium.webdriver.remote.webdriver import WebDriver
 import os
 import json
 import pandas as pd
@@ -14,7 +17,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
-
+from datetime import datetime
+from pathlib import Path
 # -------------------------------------------------------------------------------------------------------------------------------------
 # Element Highlighting
 # -------------------------------------------------------------------------------------------------------------------------------------
@@ -188,3 +192,83 @@ def LaunchBrowser(url):
     driver.maximize_window()
     driver.get(url)
     return driver
+
+
+
+# … existing highlight_element(), iaction(), get_locator(), etc. …
+
+# -------------------------------------------------------------------------------------------------------------------------------------
+# Screenshot Helper
+# -------------------------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------------------------
+# Word Report & Screenshot Helpers
+# -------------------------------------------------------------------------------------------------------------------------------------
+
+
+def start_word_report(test_case_id: str) -> tuple[Document, str]:
+    """
+    Create a new Word document under Test_Report/docs named
+      {TestCase_ID}_{DD_MM_YYYY_HH_MM_SS}.docx
+    and write the test description as the first paragraph.
+    Returns (Document, full_path).
+    """
+    # load the description from the control file
+    ctrl_path = os.path.join("Execution_Control_File", "ExecutionControl.xlsx")
+    df_ctrl = pd.read_excel(ctrl_path)
+    df_ctrl.columns = df_ctrl.columns.str.strip()
+    desc_row = df_ctrl.loc[df_ctrl["TestCase_ID"].astype(str).str.strip() == test_case_id]
+    if desc_row.empty:
+        raise KeyError(f"No description found for {test_case_id} in ExecutionControl.xlsx")
+    description = desc_row.iloc[0]["Description"]
+
+    # prepare file path
+    ts = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+    docs_dir = os.path.join("Test_Report", "docs")
+    os.makedirs(docs_dir, exist_ok=True)
+    filename = f"{test_case_id}_{ts}.docx"
+    full_path = os.path.join(docs_dir, filename)
+
+    # create and initialize document
+    doc = Document()
+    doc.add_heading(f"Test Report: {test_case_id}", level=1)
+    doc.add_paragraph(f"Description: {description}")
+    doc.add_paragraph(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    doc.save(full_path)
+
+    return doc, full_path
+
+def add_screenshot_to_report(driver: WebDriver, doc: Document, doc_path: str, test_case_id: str):
+    """
+    Take a screenshot and append it to the given Document, then save to doc_path.
+    """
+    # 1) Capture the PNG
+    ts = datetime.now().strftime("%d_%m_%Y_%H_%M_%S_%f")
+    shots_dir = os.path.join("Test_Report", "screenshots")
+    os.makedirs(shots_dir, exist_ok=True)
+    png_name = f"{test_case_id}_{ts}.png"
+    png_path = os.path.join(shots_dir, png_name)
+    driver.save_screenshot(png_path)
+
+    # 2) Build caption from ExecutionControl.xlsx
+    ctrl_df = pd.read_excel(os.path.join("Execution_Control_File","ExecutionControl.xlsx"))
+    ctrl_df.columns = ctrl_df.columns.str.strip()
+    desc = (
+        ctrl_df.loc[
+            ctrl_df["TestCase_ID"].astype(str).str.strip()==test_case_id,
+            "Description"
+        ]
+        .iat[0]
+    )
+
+    caption = f"{test_case_id} — {desc}"
+    doc.add_paragraph(caption)
+    doc.add_picture(png_path, width=Inches(6))
+
+    # 3) Save back to the known path
+    doc.save(doc_path)
+
+def finalize_word_report(doc: Document, doc_path: str):
+    """
+    No-op (you could add footers/page-numbers here if desired).
+    """
+    pass
