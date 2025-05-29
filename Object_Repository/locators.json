@@ -1,77 +1,36 @@
 {
-
     "Reject_Cookies": [
+      { "by": "CSS_SELECTOR", "value": "#onetrust-reject-all-handler", "auto_healed": false },
+      { "by": "XPATH",        "value": "//button[@id='onetrust-reject-all-handler']", "auto_healed": false }
+    ],
 
-    { "by": "CSS_SELECTOR", "value": "#onetrust-reject-all-handler" },
-    { "by": "XPATH",        "value": "//button[@id='onetrust-reject-all-handler']" }
-  ],
+    "Login_btn1": [
+      {"by": "CSS_SELECTOR", "value": "a[data-qa-id='layout-header-user-logon']", "auto_healed": false},
+      {"by": "XPATH", "value": "//a[@data-qa-id='layout-header-user-logon']", "auto_healed": false}
+    ],
 
-  "login_Menu_Link": [
+    "Login_btn2": [
+      { "by": "CSS_SELECTOR", "value": "button[data-qa-id='oauth-logon-button']", "auto_healed": false },
+      { "by": "XPATH",        "value": "//button[@data-qa-id='oauth-logon-button']", "auto_healed": false }
+    ],
 
-    { "by": "CSS_SELECTOR", "value": ".layout-header-action-account__link.link" },
-    { "by": "XPATH",        "value": "//a[@class='layout-header-action-account__link link']" }
-  ],
+    "email_field": [
+      { "by": "ID",           "value": "zds-:r4:", "auto_healed": false },
+      { "by": "XPATH",        "value": "//input[@id='zds-:r4:']", "auto_healed": false }
+    ],
 
+    "Password_field": [
+      { "by": "ID",           "value": "zd-:r7:", "auto_healed": false },
+      { "by": "XPATH",        "value": "//input[@id='zd-:r7:']", "auto_healed": false }
+    ],
 
-  "email_field": [
-    { "by": "ID",           "value": "zds-:r4:" },
-    { "by": "XPATH",        "value": "//input[@id='zds-:r4:']" }
-  ],
+    "Login_btn3": [
+      { "by": "CSS_SELECTOR", "value": "button[data-qa-id='logon-form-submit']", "auto_healed": false },
+      { "by": "XPATH",        "value": "//button[@data-qa-id='logon-form-submit']", "auto_healed": false }
+    ],
 
-    "Passcode_field": [
-    { "by": "ID",           "value": "zds-:r7:" },
-    { "by": "XPATH",        "value": "//input[@id='zds-:r7:']" }
-  ],
-
-    "Log_in_Button": [
-
-    { "by": "CSS_SELECTOR", "value": ".zds-button.enhanced-oauth-logon-view__button.zds-button--primary.zds-button--small" },
-    { "by": "XPATH",        "value": "//button[normalize-space()='LOG IN']" }
-  ],
-
-    "Login_Button": [
-
-    { "by": "CSS_SELECTOR", "value": "button[role='button']" },
-    { "by": "XPATH",        "value": "//button[@role='button']" }
-  ],
-
-  "login_error_message": [
-    {
-      "by": "XPATH",
-      "value": "//div[contains(@class,'error-feedback')]//p[contains(normalize-space(.),'do not correspond to any account')]"
-    }
-  ]
-
-
+    "login_error_message": [
+      { "by": "CLASS_NAME",   "value": "zds-input_error", "auto_healed": false },
+      { "by": "XPATH",        "value": "//h1[@id='zds-:r8:']", "auto_healed": false }
+    ]
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

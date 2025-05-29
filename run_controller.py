@@ -5,8 +5,8 @@
 #                pass TestCase_ID + URL into Behave, collect PASS/FAIL,
 #                generate Excel & Allure reports, export summary CSV,
 #                then launch Streamlit dashboard and open it in browser.
-# Author       : ChatGPT (adapted)
-# Date Updated : 2025-05-09
+# Author       : Aniket Pathare (enhanced with AI-driven Self-Healing)
+# Date Updated : 2025-05-11
 #***********************************************************************************************************************
 
 import os
@@ -15,6 +15,7 @@ import glob
 import pandas as pd
 import subprocess
 import webbrowser
+import time
 from datetime import datetime
 
 # --- Paths ---
@@ -26,17 +27,42 @@ ALLURE_RESULTS  = os.path.join(REPORT_DIR, "allure-results")
 SUMMARY_CSV     = os.path.join(REPORT_DIR, "results_summary.csv")
 STREAMLIT_APP   = os.path.join("Streamlit_Dashboard", "streamlit_app.py")
 STREAMLIT_URL   = "http://localhost:8501"
+HEALING_LOG     = os.path.join("Logs", "healing.log")
 
+# -------------------------------------------------------------------------------------------------------------------------------------
+# Helper: Count self-healing events
+# -------------------------------------------------------------------------------------------------------------------------------------
+def count_healing_events(test_case_id=None):
+    """
+    Count healing events in the log. Optionally filter by TestCase_ID if logged.
+    """
+    count = 0
+    if os.path.exists(HEALING_LOG):
+        with open(HEALING_LOG, 'r') as log:
+            for line in log:
+                if not line.strip():
+                    continue
+                if test_case_id:
+                    # expecting log entries contain the key in brackets
+                    if f"[{test_case_id}]" in line:
+                        count += 1
+                else:
+                    count += 1
+    return count
+
+# -------------------------------------------------------------------------------------------------------------------------------------
+# Main Runner
+# -------------------------------------------------------------------------------------------------------------------------------------
 def main():
-    # 1) Load control file
+    # 1) Validate control file
     if not os.path.exists(CONTROL_FILE):
-        print(f"[ERROR] COULD NOT FIND: {CONTROL_FILE}")
+        print(f"[ERROR] Control file not found: {CONTROL_FILE}")
         return
     ctrl_df = pd.read_excel(CONTROL_FILE)
 
-    # 2) Load Config sheet for environment→URL
+    # 2) Validate test data config
     if not os.path.exists(TESTDATA_FILE):
-        print(f"[ERROR] COULD NOT FIND: {TESTDATA_FILE}")
+        print(f"[ERROR] Test data file not found: {TESTDATA_FILE}")
         return
     config_df = pd.read_excel(TESTDATA_FILE, sheet_name="Config")
     config_df.columns = config_df.columns.str.strip()
@@ -45,76 +71,82 @@ def main():
     os.makedirs(ALLURE_RESULTS, exist_ok=True)
     os.makedirs(REPORT_DIR, exist_ok=True)
 
-    # 4) Run each flagged test and collect summary
+    # 4) Execute tests and collect summary
     summary_records = []
     for idx, row in ctrl_df.iterrows():
         flag  = str(row.get("Execution", "")).strip().upper()
         tc_id = str(row.get("TestCase_ID", "")).strip()
         env   = str(row.get("Environment", "")).strip()
 
-        if flag != "Y":
-            ctrl_df.at[idx, "Status"] = "SKIPPED"
-            summary_records.append({
-                "TestCase_ID": tc_id, "Environment": env,
-                "StartTime": None, "EndTime": None, "Duration": None,
-                "Status": "SKIPPED"
-            })
+        # Initialize healing count before execution
+        healed_before = count_healing_events(tc_id)
+
+        start_time = None
+        end_time   = None
+        duration   = None
+        status     = 'SKIPPED'
+        healed_count = 0
+
+        if flag != 'Y':
+            status = 'SKIPPED'
             print(f"[SKIPPED] {tc_id} (flag != Y)")
-            continue
+        else:
+            # Lookup URL from config
+            env_row = config_df.loc[config_df["Env"] == env]
+            if env_row.empty:
+                status = 'ERROR'
+                print(f"[ERROR] No URL for environment '{env}' for {tc_id}")
+            else:
+                url = env_row.iloc[0]["URL"]
+                # Find feature file
+                pattern = os.path.join(FEATURE_DIR, f"*{tc_id}*.feature")
+                matches = glob.glob(pattern)
+                if not matches:
+                    status = 'SKIPPED'
+                    print(f"[SKIPPED] Feature file not found for {tc_id}")
+                elif len(matches) > 1:
+                    status = 'ERROR'
+                    print(f"[ERROR] Multiple feature files found for {tc_id}: {matches}")
+                else:
+                    feat_file = matches[0]
+                    # Execute Behave with Allure
+                    print(f"[RUNNING] {tc_id} on {env} → {url}")
+                    start_time = datetime.now()
+                    cmd = [
+                        sys.executable, "-m", "behave",
+                        feat_file,
+                        "-D", f"testcase={tc_id}",
+                        "-D", f"url={url}",
+                        "-f", "allure_behave.formatter:AllureFormatter",
+                        "-o", ALLURE_RESULTS
+                    ]
+                    ret = subprocess.call(cmd)
+                    end_time = datetime.now()
+                    status = 'PASS' if ret == 0 else 'FAIL'
+                    print(f"[{status}] {tc_id} ({(end_time - start_time).total_seconds():.1f}s)")
 
-        # 4a) Lookup URL
-        env_row = config_df.loc[config_df["Env"] == env]
-        if env_row.empty:
-            ctrl_df.at[idx, "Status"] = "ERROR"
-            summary_records.append({
-                "TestCase_ID": tc_id, "Environment": env,
-                "StartTime": None, "EndTime": None, "Duration": None,
-                "Status": "ERROR"
-            })
-            print(f"[ERROR] No URL for env '{env}'")
-            continue
-        url = env_row.iloc[0]["URL"]
+        # After execution or skip/error, count healing
+        healed_after = count_healing_events(tc_id)
+        healed_count = healed_after - healed_before
 
-        # 4b) Find feature file
-        pattern = os.path.join(FEATURE_DIR, f"*{tc_id}*.feature")
-        matches = glob.glob(pattern)
-        if not matches or len(matches) > 1:
-            status = "SKIPPED" if not matches else "ERROR"
-            ctrl_df.at[idx, "Status"] = status
-            summary_records.append({
-                "TestCase_ID": tc_id, "Environment": env,
-                "StartTime": None, "EndTime": None, "Duration": None,
-                "Status": status
-            })
-            print(f"[{status}] Feature lookup for '{tc_id}': {matches}")
-            continue
-        feat_file = matches[0]
+        # Record times/duration
+        if start_time and end_time:
+            duration = (end_time - start_time).total_seconds()
 
-        # 4c) Execute Behave
-        print(f"[RUNNING] {tc_id} on {env} → {url}")
-        start_time = datetime.now()
-        cmd = [
-            sys.executable, "-m", "behave",
-            feat_file,
-            "-D", f"testcase={tc_id}",
-            "-D", f"url={url}",
-            # "-f", "allure_behave.formatter:AllureFormatter",
-            # "-o", ALLURE_RESULTS,
-        ]
-        ret = subprocess.call(cmd)
-        end_time = datetime.now()
-
-        status = "PASS" if ret == 0 else "FAIL"
-        ctrl_df.at[idx, "Status"] = status
-        duration = (end_time - start_time).total_seconds()
         summary_records.append({
-            "TestCase_ID": tc_id, "Environment": env,
-            "StartTime": start_time, "EndTime": end_time,
-            "Duration": duration, "Status": status
+            "TestCase_ID": tc_id,
+            "Environment": env,
+            "StartTime": start_time,
+            "EndTime": end_time,
+            "Duration": duration,
+            "Status": status,
+            "Healed_Count": healed_count
         })
-        print(f"[{status}] {tc_id} ({duration:.1f}s)")
 
-    # 5) Persist updated statuses
+        # Update status back into control file dataframe
+        ctrl_df.at[idx, "Status"] = status
+
+    # 5) Persist updated statuses back to Excel
     ctrl_df.to_excel(CONTROL_FILE, index=False)
     print(f"[INFO] Control file updated: {CONTROL_FILE}")
 
@@ -123,15 +155,14 @@ def main():
     summary_df.to_csv(SUMMARY_CSV, index=False)
     print(f"[INFO] Summary CSV written: {SUMMARY_CSV}")
 
-    # 7) Launch Streamlit dashboard and open in browser
+    # 7) Launch Streamlit dashboard
     if os.path.exists(STREAMLIT_APP):
         print(f"[INFO] Starting Streamlit: {STREAMLIT_APP}")
         proc = subprocess.Popen(
             [sys.executable, "-m", "streamlit", "run", STREAMLIT_APP],
             cwd=os.getcwd()
         )
-        # give it a moment to start
-        import time; time.sleep(3)
+        time.sleep(3)
         webbrowser.open(STREAMLIT_URL)
         print(f"Dashboard is running at {STREAMLIT_URL}. Press Ctrl+C to stop.")
         proc.communicate()
