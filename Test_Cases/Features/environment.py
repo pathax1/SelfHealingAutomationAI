@@ -1,17 +1,15 @@
-# Test_Cases/Features/environment.py
-
 # ***********************************************************************************************************************
 # File         : environment.py
 # Description  : Behave hooks for launching browser, starting reports, and tracking
 #                self-healing metrics per scenario.
 # Author       : Aniket Pathare (AI-enhanced)
-# Date Updated : 2025-05-11
+# Date Updated : 2025-06-12
 # ***********************************************************************************************************************
 
 import os
 import pandas as pd
 
-# import the healing counter from run_controller
+# --- Healing event count from run_controller for stats ---
 from run_controller import count_healing_events
 
 from Common_Functions.CommonFunctions import (
@@ -22,20 +20,11 @@ from Common_Functions.CommonFunctions import (
 )
 
 def before_scenario(context, scenario):
-    """
-    Behave hook: runs before every scenario.
-
-    - Pulls TestCase_ID and URL from -D args
-    - Records initial self-healing event count
-    - Launches browser to given URL
-    - Loads test data row into context.testdata
-    - Starts Word report for this TC
-    """
-    # Retrieve TestCase ID and URL
+    # Retrieve TestCase ID and URL from Behave -D options
     tc_id = context.config.userdata.get("testcase")
     url   = context.config.userdata.get("url")
 
-    # Record healing count before scenario execution
+    # Track healing count before scenario
     context.healed_before = count_healing_events(tc_id)
 
     # Launch browser session
@@ -53,26 +42,23 @@ def before_scenario(context, scenario):
     # Initialize Word report
     context.report_doc, context.report_path = start_word_report(tc_id)
 
-
 def after_scenario(context, scenario):
-    """
-    Behave hook: runs after every scenario.
+    try:
+        # Calculate healed locator count
+        tc_id = context.config.userdata.get("testcase")
+        context.healed_after = count_healing_events(tc_id)
+        healed_count = context.healed_after - context.healed_before
 
-    - Counts self-healing events after scenario
-    - Logs healed count into Word report
-    - Finalizes and saves the Word report
-    - Quits the browser session
-    """
-    # Calculate healed locator count
-    tc_id = context.config.userdata.get("testcase")
-    context.healed_after = count_healing_events(tc_id)
-    healed_count = context.healed_after - context.healed_before
+        # Append healing summary to report
+        if hasattr(context, "report_doc") and hasattr(context, "report_path"):
+            context.report_doc.add_paragraph(f"Healed Locators: {healed_count}")
+            # Finalize and save report
+            finalize_word_report(context.report_doc, context.report_path)
 
-    # Append healing summary to report
-    context.report_doc.add_paragraph(f"Healed Locators: {healed_count}")
+        # Teardown browser
+        if hasattr(context, "driver") and context.driver:
+            context.driver.quit()
 
-    # Finalize and save report
-    finalize_word_report(context.report_doc, context.report_path)
-
-    # Teardown browser
-    context.driver.quit()
+    except Exception as e:
+        print(f"[HOOK ERROR][after_scenario] {e}")
+        # Do not re-raise: log but do not cause Behave to FAIL due to hook reporting errors
