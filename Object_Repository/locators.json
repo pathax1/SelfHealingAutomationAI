@@ -5,13 +5,13 @@
     ],
 
     "LOG_IN": [
-      {"by": "CSS_SELECTOR", "value": "a[data-qa-id='layout-header-user-logon']", "class": "layout-header-action__link layout-header-action__link--type-text link","auto_healed": false},
-      {"by": "XPATH", "value": "//a[@data-qa-id='layout-header-user-logon']", "class": "layout-header-action__link layout-header-action__link--type-text link","auto_healed": false}
+      {"by": "CSS_SELECTOR", "value": "a[data-qa-id='layout-header-user-loon']", "class": "layout-header-action__link layout-header-action__link--type-text link","auto_healed": false},
+      {"by": "XPATH", "value": "//a[@data-qa-id='layout-header-user-loon']", "class": "layout-header-action__link layout-header-action__link--type-text link","auto_healed": false}
     ],
 
     "Logon_Button": [
-      { "by": "CSS_SELECTOR", "value": "button[data-qa-id='oauth-logo-button']", "class": "zds-button enhanced-oauth-logon-view__button zds-button--primary zds-button--small","auto_healed": false },
-      { "by": "XPATH",        "value": "//button[@data-qa-id='oauth-logo-button']","class": "zds-button enhanced-oauth-logon-view__button zds-button--primary zds-button--small", "auto_healed": false }
+      { "by": "CSS_SELECTOR", "value": "button[data-qa-id='oauth-loon-button']", "class": "zds-button enhanced-oauth-logon-view__button zds-button--primary zds-button--small","auto_healed": false },
+      { "by": "XPATH",        "value": "//button[@data-qa-id='oauth-loon-button']","class": "zds-button enhanced-oauth-logon-view__button zds-button--primary zds-button--small", "auto_healed": false }
     ],
 
     "email_field": [
@@ -25,8 +25,8 @@
     ],
 
     "Logon_Submit": [
-      {"by": "CSS_SELECTOR","value": "button[data-qa-id='logon-form-submit']","class": "zds-button generic-form-submit-button login-form__submit-button zds-button--primary zds-button--small", "auto_healed": false},
-      {"by": "XPATH","value": "//button[@data-qa-id='logon-form-submit']","class": "zds-button generic-form-submit-button login-form__submit-button zds-button--primary zds-button--small", "auto_healed": false}
+      {"by": "CSS_SELECTOR","value": "button[data-qa-id='loon-form-submit']","class": "zds-button generic-form-submit-button login-form__submit-button zds-button--primary zds-button--small", "auto_healed": false},
+      {"by": "XPATH","value": "//button[@data-qa-id='loon-form-submit']","class": "zds-button generic-form-submit-button login-form__submit-button zds-button--primary zds-button--small", "auto_healed": false}
     ],
 
     "login_error_message": [
@@ -34,8 +34,8 @@
     ],
 
     "UserProfileLink": [
-      { "by": "CSS_SELECTOR", "value": "a[data-qa-id='my-account-profile'].zds-selection-cell__link-wrapper", "class": "zds-cell zds-selection-cell layout-account-main-view-navigation-menu__item layout-account-main-view-navigation-menu__item--selected","auto_healed": false },
-      { "by": "XPATH",        "value": "//a[@data-qa-id='my-account-profile' and contains(@class,'zds-selection-cell__link-wrapper')]","class": "zds-cell zds-selection-cell layout-account-main-view-navigation-menu__item layout-account-main-view-navigation-menu__item--selected", "auto_healed": false }
+      { "by": "CSS_SELECTOR", "value": "a[data-qa-id='my-acount-profile'].zds-selection-cell__link-wrapper", "class": "zds-cell zds-selection-cell layout-account-main-view-navigation-menu__item layout-account-main-view-navigation-menu__item--selected","auto_healed": false },
+      { "by": "XPATH",        "value": "//a[@data-qa-id='my-accunt-profile' and contains(@class,'zds-selection-cell__link-wrapper')]","class": "zds-cell zds-selection-cell layout-account-main-view-navigation-menu__item layout-account-main-view-navigation-menu__item--selected", "auto_healed": false }
     ],
 
     "header_user_account": [
@@ -66,7 +66,68 @@
 
     "Logout_Button": [
       { "by": "XPATH",        "value": "//button[@data-qa-id='profile-menu-logout']","class": "zds-button logout-button profile-menu-view__logout-button zds-button--secondary zds-button--small", "auto_healed": false }
-   ]
+   ],
+
+      "REGISTER_BUTTON": [
+      { "by": "CSS_SELECTOR", "value": "button[data-qa-id='logon-view-alternate-button']","class": "zds-button oauth-logon-view__button zds-button--secondary zds-button--small", "auto_healed": false },
+      { "by": "XPATH", "value": "//button[@data-qa-id='logon-view-alternate-button']","class": "zds-button oauth-logon-view__button zds-button--secondary zds-button--small", "auto_healed": false }
+    ],
+
+  "EMAIL_FIELD": [
+    { "by": "CSS_SELECTOR", "value": "input[name='email']", "class": "zds-input-base__input", "auto_healed": false },
+    { "by": "XPATH", "value": "//input[@name='email']", "class": "zds-input-base__input", "auto_healed": false }
+  ],
+
+  "PASSWORD_FIELD": [
+    { "by": "CSS_SELECTOR", "value": "input[name='password']", "class": "zds-input-base__input", "auto_healed": false },
+    { "by": "XPATH", "value": "//input[@name='password']", "class": "zds-input-base__input", "auto_healed": false }
+  ],
+
+  "FIRST_NAME_FIELD": [
+    { "by": "CSS_SELECTOR", "value": "input[name='firstName']", "class": "zds-input-base__input", "auto_healed": false },
+    { "by": "XPATH", "value": "//input[@name='firstName']", "class": "zds-input-base__input", "auto_healed": false }
+  ],
+
+  "LAST_NAME_FIELD": [
+    { "by": "CSS_SELECTOR", "value": "input[name='lastName']", "class": "zds-input-base__input", "auto_healed": false },
+    { "by": "XPATH", "value": "//input[@name='lastName']", "class": "zds-input-base__input", "auto_healed": false }
+  ],
+
+  "PHONE_NUMBER_FIELD": [
+    { "by": "CSS_SELECTOR", "value": "input[name='phone.number']", "class": "zds-input-base__input", "auto_healed": false },
+    { "by": "XPATH", "value": "//input[@name='phone.number']", "class": "zds-input-base__input", "auto_healed": false }
+  ],
+
+"NEWSLETTER_CHECKBOX": [
+  {"by": "CSS_SELECTOR", "value": "label.zds-checkbox.form-input-checkbox span.zds-checkbox-control", "class": "zds-checkbox-control", "auto_healed": false},
+  {"by": "XPATH", "value": "//label[contains(@class, 'zds-checkbox') and contains(@class, 'form-input-checkbox')]/span[contains(@class, 'zds-checkbox-control')]", "class": "zds-checkbox-control", "auto_healed": false}
+],
+
+
+"PRIVACY_CHECKBOX": [
+  {"by": "XPATH", "value": "//div[@data-name='privacyCheck']//span[@class='zds-checkbox-control']", "class": "zds-checkbox-control", "auto_healed": false},
+  {"by": "CSS_SELECTOR", "value": "div[data-name='privacyCheck'] span.zds-checkbox-control", "class": "zds-checkbox-control", "auto_healed": false}
+],
+
+  "SIGN_UP_SUBMIT_BUTTON": [
+    { "by": "CSS_SELECTOR", "value": "button[data-qa-action='sign-up-submit']", "class": "zds-button zds-button--secondary zds-button--small", "auto_healed": false },
+    { "by": "XPATH", "value": "//button[@data-qa-action='sign-up-submit']", "class": "zds-button zds-button--secondary zds-button--small", "auto_healed": false }
+  ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

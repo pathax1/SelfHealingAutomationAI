@@ -30,17 +30,17 @@ def click_element(driver, by, value, timeout=10):
     try:
         print(f"[ACTION] Trying click on: ({by}, {value})")
         WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((by, value))).click()
-        print("[✅ CLICKED]")
+        print("[ CLICKED]")
         time.sleep(2)
     except Exception as e:
-        print(f"[⚠️ FAILED] Could not click: {e}")
+        print(f"[ FAILED] Could not click: {e}")
 
 def wait_for_element(driver, by, value, timeout=10):
     try:
         WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
         print(f"[🟢 READY] Element found: ({by}, {value})")
     except Exception as e:
-        print(f"[❌ TIMEOUT] Could not find element: {e}")
+        print(f"[ TIMEOUT] Could not find element: {e}")
 
 def generate_element_key(tag_name, tag_id, tag_name_attr, tag_class, tag_data_qa, tag_text):
     """Generate a robust, readable element key for training."""
@@ -219,7 +219,7 @@ def extract_elements(driver, output_csv="ai_selector_training_data.csv"):
             writer.writerow(["element_key", "input_text", "target_text_xpath", "target_text_css", "class"])
         writer.writerows(rows)
 
-    print(f"[✅ DONE] Extracted {len(rows)} elements. Appended to {output_csv}")
+    print(f"[ DONE] Extracted {len(rows)} elements. Appended to {output_csv}")
 
 if __name__ == "__main__":
     driver = launch_browser("https://www.zara.com/ie/")
@@ -232,11 +232,59 @@ if __name__ == "__main__":
     wait_for_element(driver, By.XPATH, "//button[@data-qa-id='oauth-logon-button']")
     extract_elements(driver)  # Step 3
 
-    # 👇 Smart JS click to avoid obstruction
+    #  Smart JS click to avoid obstruction
     driver.execute_script("document.querySelector('button[data-qa-id=\"oauth-logon-button\"]').click()")
 
     wait_for_element(driver, By.XPATH, "//input[@id='zds-:r5:']")
     time.sleep(2)
     extract_elements(driver)  # Step 4
+
+    click_element(driver, By.XPATH, "//a[@data-qa-id='logon-view-alternate-button']")
+    wait_for_element(driver, By.XPATH, "//input[@data-qa-input-qualifier='email']")
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    click_element(driver, By.XPATH, "//button[@data-qa-id='layout-header-toggle-menu']")
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    click_element(driver, By.XPATH,"//div[@data-qa-qualifier='category-level-1']//a[.//span[text()='MAN']]")
+    time.sleep(2)
+
+    click_element(driver, By.XPATH,"//li[@data-qa-qualifier='category-level-3']//a[@class='layout-categories-category__link link' and .//span[text()='VIEW ALL']]")
+    extract_elements(driver)  # Step 5
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
+
+    extract_elements(driver)  # Step 5
+    time.sleep(2)
 
     driver.quit()

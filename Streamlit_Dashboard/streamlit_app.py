@@ -251,6 +251,21 @@ with tabs[1]:
                      title="Best ROUGE-L and Exact Match per Model")
         st.plotly_chart(fig, use_container_width=True)
 
+    # ---------- NEW: Final Accuracy/Precision/Recall/F1 Leaderboard and Visuals ----------
+    metrics_cols = ["accuracy", "precision", "recall", "f1_score"]
+    metrics_present = [col for col in metrics_cols if col in best_per_model.columns]
+    if metrics_present:
+        st.subheader("Final Accuracy, Precision, Recall, F1 Leaderboard (Best per Model)")
+        metric_df = best_per_model[["Model"] + metrics_present].sort_values(
+            by="f1_score" if "f1_score" in metrics_present else metrics_present[0], ascending=False)
+        st.dataframe(metric_df, use_container_width=True)
+        # Visualize each metric
+        for metric in metrics_present:
+            st.markdown(f"#### {metric.capitalize()} per Model")
+            fig = px.bar(metric_df, x="Model", y=metric, color="Model", text=metric,
+                         title=f"{metric.capitalize()} (Best per Model)")
+            st.plotly_chart(fig, use_container_width=True)
+
     # Visuals: word cloud, missing/null heatmap
     st.subheader("Frequent Locators (Word Cloud)")
     if "element_key" in clean_data:

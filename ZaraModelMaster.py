@@ -13,17 +13,19 @@ from transformers import (
 )
 import evaluate
 import optuna
-
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 # ============== CONFIG ==============
 SEED = 42
 set_seed(SEED)
 DATA_PATH = "ai_selector_training_data.csv"
-OUTPUT_DIR = "./trained_xpath_model"
+#OUTPUT_DIR = "./trained_xpath_model"
+OUTPUT_DIR = "./trained_xpath_model_t5"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 BATCH_SIZE = 4
 EPOCHS = 10
 
-MODEL_NAME = "facebook/bart-base"
+#MODEL_NAME = "facebook/bart-base"
+MODEL_NAME = "t5-base"
 MAX_INPUT_LEN = 512
 MAX_TARGET_LEN = 300
 
@@ -243,6 +245,40 @@ def evaluate_gguf_model(model_name, model_path, test_inputs, test_targets, max_t
     stats_df.to_csv(stats_csv, index=False)
     print(f" {model_name} stats saved to {stats_csv}")
 
+
+def calc_metrics(targets, predictions):
+    # Convert to lists of characters (for character-level metrics)
+    target_chars = [list(str(t)) for t in targets]
+    pred_chars = [list(str(p)) for p in predictions]
+
+    # Flatten lists for micro-averaged scores
+    y_true = sum(target_chars, [])
+    y_pred = sum(pred_chars, [])
+
+    # Pad lists to the same length
+    max_len = max(len(y_true), len(y_pred))
+    y_true += [''] * (max_len - len(y_true))
+    y_pred += [''] * (max_len - len(y_pred))
+
+    # Map to 1/0 for match (strict, per character)
+    matches = [yt == yp for yt, yp in zip(y_true, y_pred)]
+    acc = sum(matches) / len(matches)
+
+    # For precision/recall/f1, treat each unique character as a class
+    all_labels = list(set(y_true + y_pred))
+    y_true_bin = [[c == label for label in all_labels] for c in y_true]
+    y_pred_bin = [[c == label for label in all_labels] for c in y_pred]
+
+    precision = precision_score(y_true_bin, y_pred_bin, average='micro', zero_division=0)
+    recall = recall_score(y_true_bin, y_pred_bin, average='micro', zero_division=0)
+    f1 = f1_score(y_true_bin, y_pred_bin, average='micro', zero_division=0)
+
+    return {
+        "accuracy": acc,
+        "precision": precision,
+        "recall": recall,
+        "f1_score": f1
+    }
 # ============== MAIN TRAINING BLOCK ==============
 if __name__ == "__main__":
     # ---- Data ----
@@ -344,6 +380,22 @@ if __name__ == "__main__":
     test_df["predicted_xpath"] = preds
     test_df.to_csv(os.path.join(OUTPUT_DIR, "test_predictions.csv"), index=False)
     print("Test predictions saved.")
+
+    # --- Compute and log accuracy, precision, recall, F1 ---
+    metrics = calc_metrics(
+        test_df["target_text_xpath"].tolist(),
+        test_df["predicted_xpath"].tolist()
+    )
+    for k, v in metrics.items():
+        print(f"{k.capitalize()}: {v:.4f}")
+
+    # Optionally: Save to CSV for Streamlit
+    metrics_row = {**metrics, "Model": MODEL_NAME, "epoch": "FINAL"}
+    stats_path = os.path.join("Model_Training_Stats", MODEL_NAME.replace("/", "_").replace("-", "_") + "_stats.csv")
+    stats_df = pd.read_csv(stats_path)
+    stats_df = pd.concat([stats_df, pd.DataFrame([metrics_row])], ignore_index=True)
+    stats_df.to_csv(stats_path, index=False)
+    print(f"Final metrics added to {stats_path}")
 
     # ---- Save and visualize errors ----
     test_df["target_len"] = test_df["target_text_xpath"].apply(len)
